@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Event Booking System API
+  version: 1.0.0
+  description: API for managing events, users, and bookings.
+servers:
+  - url: http://localhost:5000/api
+    description: Local server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, admin]
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+
+  /auth/login:
+    post:
+      summary: Login a user
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User logged in, returns JWT token
+        '401':
+          description: Invalid credentials
+
+  /events:
+    get:
+      summary: Get all events
+      tags: [Events]
+      security: []
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: date
+          description: End date for filtering
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of events
+
+    post:
+      summary: Create an event (Admin only)
+      tags: [Events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, date, capacity]
+              properties:
+                name:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                capacity:
+                  type: integer
+      responses:
+        '201':
+          description: Event created
+
+  /events/{id}:
+    put:
+      summary: Update an event (Admin only)
+      tags: [Events]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                capacity:
+                  type: integer
+      responses:
+        '200':
+          description: Event updated
+
+    delete:
+      summary: Delete an event (Admin only)
+      tags: [Events]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event deleted
+
+  /events/{id}/book:
+    post:
+      summary: Book an event (Authenticated users only)
+      tags: [Events]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Event booked successfully
+        '400':
+          description: Event fully booked or user already booked
+
+  /bookings/export:
+    get:
+      summary: Export all bookings to CSV (Admin only)
+      tags: [Bookings]
+      responses:
+        '200':
+          description: CSV file downloaded
+          content:
+            text/csv:
+              schema:
+                type: string
+                  
