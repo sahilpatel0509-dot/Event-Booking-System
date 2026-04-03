@@ -34,8 +34,8 @@ Create .env file:
 
 
 PORT=5000
-MONGO_URI=mongodb+srv://sahil:sahil123@cluster0.up8sorv.mongodb.net/event_booking?retryWrites=true&w=majority
-JWT_SECRET=supersecretjwtkeytest123
+MONGO_URI=
+JWT_SECRET=
 
 
 Run server:
